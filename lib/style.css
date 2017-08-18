@@ -2,5 +2,8 @@ canvas {
   border: 1px solid #000000;
   background: #d3d3d3;
   display: block;
-  
+}
+.fail {
+  background: #cd4d4d;
+  transition: all 250ms ease;
 }
