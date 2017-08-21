@@ -2,6 +2,7 @@ canvas {
   border: 1px solid #000000;
   background: #4E5B57;
   display: block;
+  margin: auto;
 }
 .fail {
   background: #cd4d4d;
