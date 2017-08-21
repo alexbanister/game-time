@@ -65,8 +65,12 @@ describe('Ball Functionality', function () {
 
   });
 
-  it('should have a brick collision function function', function () {
+  it('should have a brick collision function', function () {
     assert.isFunction(ball.checkForCollisionsWithBrick);
+  });
+
+  it('should check which brick where hit', function () {
+    assert.isFunction(ball.checkAllBricks);
   });
 
   // need to add more detailed test for brick collision
