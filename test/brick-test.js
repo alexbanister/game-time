@@ -45,13 +45,13 @@ describe('Brick Functionality', function () {
   });
 
   it('should have a default density', function() {
-    const brick = new Brick(15, 25, 100, 25, density = 1);
+    const brick = new Brick(15, 25, 100, 25);
 
     assert.equal(brick.density, 1);
   });
 
   it('should have a function that changes brick color', function () {
-    const brick = new Brick(15, 25, 100, 25, density = 1);
+    const brick = new Brick(15, 25, 100, 25);
 
     assert.isFunction(brick.getBrickColor);
   });
