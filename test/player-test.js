@@ -49,13 +49,14 @@ describe('Player Functionality', function () {
   });
 
   it('moving the mouse should change the x value of the paddle', function () {
-    let e = { clientX: 700 }
+    let e = { layerX: 700 }
+    let canvas = { width: 1000 }
 
-    player.movePaddle('', e)
-    assert.equal(player.x, e.clientX - player.width / 2);
-    e.clientX = 100;
-    player.movePaddle('', e)
-    assert.equal(player.x, e.clientX - player.width / 2);
+    player.movePaddle(canvas, e)
+    assert.equal(player.x, e.layerX - player.width / 2);
+    e.layerX = 100;
+    player.movePaddle(canvas, e)
+    assert.equal(player.x, e.layerX - player.width / 2);
   });
 
   it('should have a function to display lives', function () {
