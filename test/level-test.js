@@ -31,10 +31,6 @@ describe('Level Functionality', function () {
     assert.equal(level.currentLevel, 2);
   });
 
-  it('should have a function that builds a start screen', function () {
-    assert.isFunction(level.drawStartScreenText);
-  });
-
   it('should have a function that builds draws a level', function () {
     assert.isFunction(level.drawLevel);
   });
