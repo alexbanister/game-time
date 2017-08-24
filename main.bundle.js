@@ -45,25 +45,27 @@
 /***/ (function(module, exports, __webpack_require__) {
 
 	const Render = __webpack_require__(1);
-	const Brick = __webpack_require__(2);
-	const Ball = __webpack_require__(3);
-	const Player = __webpack_require__(4);
-	const PowerUp = __webpack_require__(5);
-	const Level = __webpack_require__(6);
+	const Ball = __webpack_require__(2);
+	const Player = __webpack_require__(3);
+	const Level = __webpack_require__(5);
 	const Style = __webpack_require__(7);
 
 	var canvas = document.getElementById('game');
 	var context = canvas.getContext('2d');
 
 	var player = new Player();
-	var level = new Level(1);
+	var level = new Level();
 	var ball = new Ball();
 	var render = new Render(0, 0, 0, 0);
+	var img = new Image();
+
+	img.src = './img/background.png';
 
 	function gameLoop() {
 	  context.clearRect(0, 0, canvas.width, canvas.height);
-	  // level.drawBackground(context);
-	  level.drawLevel(context);
+	  render.drawBackground(context, canvas, level);
+	  context.drawImage(img, 0, 0);
+	  level.drawLevel(context, player);
 	  // level.drawStartScreenBackground(context);
 	  render.drawStartScreenText(context, canvas, level);
 	  render.drawPaddle(context, player);
@@ -72,17 +74,15 @@
 	  render.displayLevel(context, level, canvas);
 	  render.makeBall(context, ball);
 	  ball.stickyBall(player);
-	  ball.checkForCollisionsWithBrick(level, player);
+	  ball.checkForCollisionsWithBrick(level, player, context);
 	  ball.checkForCollisionsWithWall(canvas.width);
 	  ball.checkForCollisionsWithPaddle(player);
 	  level.checkGameState(canvas, context, player, ball);
-	  //level.currentPowerUps[0].powerUp();
 	  if (player.currentPowerUps.length > 0) {
 	    player.currentPowerUps.forEach(powerUp => {
 	      powerUp.drawPowerUp();
 	    });
 	  }
-	  //ball.checkForGameOver(canvas, context, player);
 
 	  requestAnimationFrame(gameLoop);
 	}
@@ -107,30 +107,91 @@
 	  }
 
 	  drawPaddle(context, player) {
+	    let alpha = context.globalAlpha;
+	    let gradient;
+
+	    // layer1/Rectangle
+	    context.translate(player.x, player.y);
+	    context.save();
+	    context.scale(player.scale, 1);
 	    context.beginPath();
-	    context.rect(player.x, player.y, player.width, player.height);
-	    context.fillStyle = "black";
-	    context.fill();
+	    context.moveTo(92.5, 15.0);
+	    context.lineTo(7.5, 15.0);
+	    context.bezierCurveTo(3.4, 15.0, 0.0, 11.6, 0.0, 7.5);
+	    context.lineTo(0.0, 7.5);
+	    context.bezierCurveTo(0.0, 3.4, 3.4, -0.0, 7.5, -0.0);
+	    context.lineTo(92.5, -0.0);
+	    context.bezierCurveTo(96.6, -0.0, 100.0, 3.4, 100.0, 7.5);
+	    context.lineTo(100.0, 7.5);
+	    context.bezierCurveTo(100.0, 11.6, 96.6, 15.0, 92.5, 15.0);
 	    context.closePath();
+	    gradient = context.createLinearGradient(50.0, -0.0, 50.0, 15.0);
+	    gradient.addColorStop(0.00, "rgb(0, 0, 0)");
+	    gradient.addColorStop(0.27, "rgb(255, 255, 255)");
+	    gradient.addColorStop(1.00, "rgb(0, 0, 0)");
+	    context.fillStyle = gradient;
+	    context.fill();
+	    context.lineWidth = 0.5;
+	    context.stroke();
+
+	    // layer1/Rectangle
+	    context.globalAlpha = alpha * 0.30;
+	    context.beginPath();
+	    context.moveTo(92.5, 14.5);
+	    context.lineTo(7.5, 14.5);
+	    context.bezierCurveTo(3.7, 14.5, 0.5, 11.3, 0.5, 7.5);
+	    context.lineTo(0.5, 7.5);
+	    context.bezierCurveTo(0.5, 3.6, 3.7, 0.5, 7.5, 0.5);
+	    context.lineTo(92.5, 0.5);
+	    context.bezierCurveTo(96.4, 0.5, 99.5, 3.6, 99.5, 7.5);
+	    context.lineTo(99.5, 7.5);
+	    context.bezierCurveTo(99.5, 11.3, 96.4, 14.5, 92.5, 14.5);
+	    context.closePath();
+	    context.lineWidth = 0.5;
+	    context.strokeStyle = "rgb(255, 255, 255)";
+	    context.stroke();
+
+	    // layer1/Line
+	    context.globalAlpha = alpha * 0.25;
+	    context.beginPath();
+	    context.moveTo(7.5, 1.0);
+	    context.lineTo(7.5, 14.0);
+	    context.lineWidth = 0.5;
+	    context.strokeStyle = "rgb(0, 0, 0)";
+	    context.stroke();
+
+	    // layer1/Line
+	    context.beginPath();
+	    context.moveTo(93.1, 1.0);
+	    context.lineTo(93.1, 14.0);
+	    context.stroke();
+
+	    // layer1/Line
+	    context.beginPath();
+	    context.moveTo(50.0, 1.0);
+	    context.lineTo(50.0, 14.0);
+	    context.stroke();
+	    context.restore();
+	    context.translate(-player.x, -player.y);
 	  }
 
 	  displayLives(context, player) {
 	    context.font = "16px Monospace";
-	    context.fillStyle = "black";
+	    context.fillStyle = "#eeeeee";
 	    context.textAlign = "left";
 	    context.fillText("Lives: " + player.balls, 15, 25);
 	  }
 
 	  displayLevel(context, level, canvas) {
 	    context.font = "16px Monospace";
-	    context.fillStyle = "black";
+	    context.fillStyle = "#eeeeee";
 	    context.textAlign = "center";
 	    context.fillText("Level: " + level.currentLevel, canvas.width / 2, 25);
 	  }
 
 	  displayScore(context, canvas, player) {
 	    context.font = "16px Monospace";
-	    context.fillStyle = "black";
+	    context.fillStyle = "#eeeeee";
 	    context.textAlign = "right";
 	    context.fillText("Score: " + player.score, canvas.width - 15, 25);
 	  }
@@ -163,30 +224,31 @@
 	  drawStartScreenText(context, canvas, level) {
 	    if (level.start === true) {
 	      context.font = "60px Monospace";
-	      context.fillStyle = "#BEC3C1";
+	      context.fillStyle = "#eeeeee";
 	      context.textAlign = "center";
 	      context.fillText("Breakout", canvas.width / 2, 300);
 
 	      context.font = "20px Monospace";
-	      context.fillStyle = "#BEC3C1";
+	      context.fillStyle = "#eeeeee";
 	      context.textAlign = "center";
 	      context.fillText("Welcome to Breakout", canvas.width / 2, 350);
 
 	      context.font = "20px Monospace";
-	      context.fillStyle = "#BEC3C1";
+	      context.fillStyle = "#eeeeee";
 	      context.textAlign = "center";
 	      context.fillText("Your mouse controls the paddle", canvas.width / 2, 375);
 
 	      context.font = "20px Monospace";
-	      context.fillStyle = "#BEC3C1";
+	      context.fillStyle = "#eeeeee";
 	      context.textAlign = "center";
 	      context.fillText("Click to start", canvas.width / 2, 400);
 	    }
 	  }
 
-	  // addPowerUp (context) {
-	  //   var powerUp = new PowerUp();
-	  // }
+	  drawBackground(context, canvas, level) {
+	    context.fillStyle = level.getLevelBackground();
+	    context.fillRect(0, 0, canvas.width, canvas.height);
+	  }
 	}
 
 	module.exports = Render;
@@ -197,115 +259,12 @@
 
 	const Render = __webpack_require__(1);
 
-	class Brick extends Render {
-	  constructor(x, y, width, height, density = 1) {
-	    super(x, y, width, height);
-	    this.density = density;
-	  }
-
-	  makeBrick(context) {
-	    context.translate(this.x, this.y);
-
-	    // layer1/Rectangle
-	    context.save();
-	    context.beginPath();
-	    context.moveTo(72.7, 25.0);
-	    context.lineTo(2.3, 25.0);
-	    context.bezierCurveTo(1.0, 25.0, 0.0, 24.0, 0.0, 22.7);
-	    context.lineTo(0.0, 2.3);
-	    context.bezierCurveTo(0.0, 1.0, 1.0, 0.0, 2.3, 0.0);
-	    context.lineTo(72.7, 0.0);
-	    context.bezierCurveTo(74.0, 0.0, 75.0, 1.0, 75.0, 2.3);
-	    context.lineTo(75.0, 22.7);
-	    context.bezierCurveTo(75.0, 24.0, 74.0, 25.0, 72.7, 25.0);
-	    context.closePath();
-	    context.fillStyle = this.getBrickColor();
-	    context.fill();
-	    let gradient = context.createLinearGradient(37.5, 0.0, 37.5, 25.0);
-
-	    gradient.addColorStop(0.00, "rgba(0, 0, 0, .2)");
-	    gradient.addColorStop(0.15, "rgba(0, 0, 0, .0)");
-	    gradient.addColorStop(0.27, "rgba(0, 0, 0, .2)");
-	    gradient.addColorStop(0.74, "rgba(0, 0, 0, .5)");
-	    gradient.addColorStop(1.00, "rgba(0, 0, 0, .6)");
-	    context.fillStyle = gradient;
-	    context.fill();
-	    context.lineWidth = 0.2;
-	    context.stroke();
-
-	    // layer1/Rectangle
-	    context.globalAlpha = context.globalAlpha * 0.20;
-	    context.beginPath();
-	    context.moveTo(75.0, 12.0);
-	    context.lineTo(0.0, 12.0);
-	    context.lineTo(0.0, 11.0);
-	    context.lineTo(75.0, 11.0);
-	    context.lineTo(75.0, 12.0);
-	    context.closePath();
-	    context.fillStyle = "rgb(0, 0, 0)";
-	    context.fill();
-
-	    // layer1/Rectangle
-	    context.beginPath();
-	    context.moveTo(75.0, 11.0);
-	    context.lineTo(0.0, 11.0);
-	    context.lineTo(0.0, 10.0);
-	    context.lineTo(75.0, 10.0);
-	    context.lineTo(75.0, 11.0);
-	    context.closePath();
-	    context.fillStyle = "rgb(255, 255, 255)";
-	    context.fill();
-
-	    // layer1/Rectangle
-	    context.beginPath();
-	    context.moveTo(38.2, 25.0);
-	    context.lineTo(37.2, 25.0);
-	    context.lineTo(37.2, 0.0);
-	    context.lineTo(38.2, 0.0);
-	    context.lineTo(38.2, 25.0);
-	    context.closePath();
-	    context.fill();
-
-	    // layer1/Rectangle
-	    context.beginPath();
-	    context.moveTo(39.2, 25.0);
-	    context.lineTo(38.2, 25.0);
-	    context.lineTo(38.2, 0.0);
-	    context.lineTo(39.2, 0.0);
-	    context.lineTo(39.2, 25.0);
-	    context.closePath();
-	    context.fillStyle = "rgb(0, 0, 0)";
-	    context.fill();
-	    context.restore();
-	    context.translate(-this.x, -this.y);
-	  }
-
-	  getBrickColor() {
-	    let colors = ['', 'rgb(247, 123, 62)', 'rgb(247, 62, 62)', 'rgb(247, 62, 151)', 'rgb(199, 62, 247)', 'rgb(62, 64, 247)', 'rgb(62, 153, 247)', 'rgb(62, 247, 231)', 'rgb(62, 247, 103)', 'rgb(160, 247, 62)', 'rgb(247, 234, 62)'];
-	    let brickColor = 'rgb(200, 200, 200)';
-
-	    if (colors[this.density]) {
-	      brickColor = colors[this.density];
-	    }
-	    return brickColor;
-	  }
-
-	  checkForPowerUps() {}
-	}
-
-	module.exports = Brick;
-
-/***/ }),
-/* 3 */
-/***/ (function(module, exports, __webpack_require__) {
-
-	const Render = __webpack_require__(1);
-
 	class Ball extends Render {
 	  constructor(x, y, width = 10, height = 10, velocity = 0) {
 	    super(x, y, width, height);
 	    this.velocityX = velocity;
 	    this.velocityY = velocity;
+	    this.sticky = false;
 	  }
 
 	  stickyBall(player) {
@@ -330,11 +289,11 @@
 	    }
 	  }
 
-	  checkForCollisionsWithBrick(level, player) {
+	  checkForCollisionsWithBrick(level, player, context) {
 	    let hitBricks = this.checkAllBricks(level);
 
 	    if (hitBricks.length > 0) {
-	      player.ckeckForPowerUp(hitBricks[0]);
+	      player.checkForPowerUp(hitBricks, context, this);
 	      this.bounceBall(hitBricks);
 	      level.updateHitBricks(level.getBrickIndexs(hitBricks));
 	      player.increaseScore(level.getBrickIndexs(hitBricks));
@@ -352,12 +311,21 @@
 
 	  checkForCollisionsWithPaddle(player) {
 	    if (this.y + 10 > player.y - 1 && this.y + 10 < player.y + 2 && this.x + 10 > player.x && this.x < player.x + player.width) {
-	      this.velocityY += .1;
-	      this.velocityX = (this.x - player.x - player.width / 2) / (player.width / 4);
-	      this.velocityY = this.velocityY * -1;
+	      this.checkForSticky(player);
 	      return true;
 	    } else {
 	      return false;
+	    }
+	  }
+
+	  checkForSticky(player) {
+	    if (this.sticky) {
+	      this.velocityX = 0;
+	      this.velocityY = 0;
+	    } else {
+	      this.velocityY += .1;
+	      this.velocityX = (this.x - player.x - player.width / 2) / (player.width / 8);
+	      this.velocityY = this.velocityY * -1;
 	    }
 	  }
 	}
@@ -365,25 +333,28 @@
 	module.exports = Ball;
 
 /***/ }),
-/* 4 */
+/* 3 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	const Render = __webpack_require__(1);
-	const PowerUp = __webpack_require__(5);
+	const PowerUp = __webpack_require__(4);
 
 	class Player extends Render {
 	  constructor(x = 450, width = 100, height = 20, score = 0, balls = 3) {
 	    super(x, 565, width, height);
 	    this.score = score;
 	    this.balls = balls;
+	    this.scale = 1;
 	    this.currentPowerUps = [];
 	    this.activePowerUp;
 	  }
 
-	  ckeckForPowerUp(brick) {
-	    if (Math.random() > .01) {
-	      this.currentPowerUps.push(new PowerUp(brick.x + 17, brick.y, 36, 20, this));
-	    }
+	  checkForPowerUp(bricks, context, ball) {
+	    bricks.forEach(brick => {
+	      if (Math.random() > .9 && brick.density === 1) {
+	        this.currentPowerUps.push(new PowerUp(brick.x + 17, brick.y, 36, 20, this, context, ball));
+	      }
+	    });
 	  }
 
 	  removePowerUp(powerUp) {
@@ -418,73 +389,110 @@
 	    });
 	  }
 
-	  addBall() {}
-
 	  removeBall() {
 	    this.balls--;
 	  }
-
 	}
 
 	module.exports = Player;
 
 /***/ }),
-/* 5 */
+/* 4 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	const Render = __webpack_require__(1);
-	const Ball = __webpack_require__(3);
 
 	class powerUp extends Render {
-	  constructor(x, y, width, height, player) {
+	  constructor(x, y, width, height, player, context, ball) {
 	    super(x, y, width, height);
 	    this.powerUpList = [{
 	      fillStyle: 'green',
 	      power: this.extraLife,
-	      arg: player
+	      player,
+	      ball
 	    }, {
 	      fillStyle: 'blue',
 	      power: this.smallPaddle,
-	      arg: player
+	      player,
+	      ball
 	    }, {
 	      fillStyle: 'purple',
 	      power: this.largePaddle,
-	      arg: player
+	      player,
+	      ball
+	    }, {
+	      fillStyle: 'orange',
+	      power: this.stickyPaddle,
+	      player,
+	      ball
 	      // this.threeBalls,
 	      // this.guns,
 	      // this.wreckingBall,
-	      // this.stickyPaddle
 	    }], this.powerUp = this.powerUpList[Math.floor(Math.random() * this.powerUpList.length)];
-	    this.context = document.getElementById('game').getContext('2d');
+	    this.context = context;
 	    this.player = player;
+	    this.ball = ball;
 	    this.velocity = Math.random() * 1.5 + 1;
 	  }
 
 	  drawPowerUp() {
+	    this.context.translate(this.x, this.y);
+	    this.context.save();
 	    this.context.beginPath();
-	    this.context.rect(this.x, this.y, this.width, this.height);
+	    this.context.moveTo(26.0, 20.0);
+	    this.context.lineTo(10.0, 20.0);
+	    this.context.bezierCurveTo(4.5, 20.0, 0.0, 15.5, 0.0, 10.0);
+	    this.context.lineTo(0.0, 10.0);
+	    this.context.bezierCurveTo(0.0, 4.5, 4.5, 0.0, 10.0, 0.0);
+	    this.context.lineTo(26.0, 0.0);
+	    this.context.bezierCurveTo(31.5, 0.0, 36.0, 4.5, 36.0, 10.0);
+	    this.context.lineTo(36.0, 10.0);
+	    this.context.bezierCurveTo(36.0, 15.5, 31.5, 20.0, 26.0, 20.0);
+	    this.context.closePath();
 	    this.context.fillStyle = this.powerUp.fillStyle;
 	    this.context.fill();
-	    this.context.closePath();
+
+	    let gradient = this.context.createLinearGradient(18.0, 0.0, 18.0, 20.0);
+
+	    gradient.addColorStop(0.00, "rgba(255, 255, 255, 0.20)");
+	    gradient.addColorStop(0.18, "rgba(255, 255, 255, 0.50)");
+	    gradient.addColorStop(0.34, "rgba(255, 255, 255, 0.80)");
+	    gradient.addColorStop(0.54, "rgba(255, 255, 255, 0.45)");
+	    gradient.addColorStop(1.00, "rgba(255, 255, 255, 0.10)");
+	    this.context.fillStyle = gradient;
+	    this.context.fill();
+	    this.context.lineWidth = 0.5;
+	    this.context.stroke();
+	    this.context.restore();
+	    this.context.translate(-this.x, -this.y);
+
 	    this.y += this.velocity;
 	    this.hitPaddle();
 	    this.fallOffScreen();
 	  }
 
 	  removePowerUp() {
+	    this.player.scale = 1;
 	    this.player.width = 100;
+	    this.ball.sticky = false;
 	  }
 
 	  extraLife() {
-	    this.arg.balls++;
+	    this.player.balls++;
 	  }
 
 	  smallPaddle() {
-	    this.arg.width = this.arg.width / 2;
+	    this.player.scale = this.player.scale / 2;
+	    this.player.width = this.player.width / 2;
 	  }
 
 	  largePaddle() {
-	    this.arg.width = this.arg.width * 1.5;
+	    this.player.scale = this.player.scale * 2;
+	    this.player.width = this.player.width * 2;
+	  }
+
+	  stickyPaddle() {
+	    this.ball.sticky = true;
 	  }
 
 	  // threeBalls (canvas, level, render) {
@@ -511,36 +519,9 @@
 	  // }
 	  //
 	  // guns () {
-	  //   this.context.beginPath();
-	  //   this.context.rect(this.x, this.y, this.width, this.height);
-	  //   this.context.fillStyle = "purple";
-	  //   this.context.fill();
-	  //   this.context.closePath();
-	  //   this.hitPaddle ();
-	  //   this.fallOffScreen ();
-	  //   this.y += this.velocity;
 	  // }
 	  //
 	  // wreckingBall () {
-	  //   this.context.beginPath();
-	  //   this.context.rect(this.x, this.y, this.width, this.height);
-	  //   this.context.fillStyle = "grey";
-	  //   this.context.fill();
-	  //   this.context.closePath();
-	  //   this.hitPaddle ();
-	  //   this.fallOffScreen ();
-	  //   this.y += this.velocity;
-	  // }
-
-	  // stickyPaddle () {
-	  //   //Build ball array
-	  //   if ((this.y + 10 > this.arg.y - 1 &&
-	  //        this.y + 10 < this.arg.y + 2) &&
-	  //       (this.x + 10 > this.arg.x &&
-	  //        this.x < this.arg.x + this.arg.width)) {
-	  //     ball.velocityY = 0;
-	  //     ball.velocityX = 0;
-	  //   }
 	  // }
 
 	  fallOffScreen() {
@@ -568,10 +549,10 @@
 	module.exports = powerUp;
 
 /***/ }),
-/* 6 */
+/* 5 */
 /***/ (function(module, exports, __webpack_require__) {
 
-	const Brick = __webpack_require__(2);
+	const Brick = __webpack_require__(6);
 
 	class Level {
 	  constructor(currentLevel = 1) {
@@ -688,7 +669,7 @@
 	    let randomLevel = [];
 
 	    for (var i = 0; i < 84; i++) {
-	      let brickDensity = Math.floor(Math.random() * this.currentLevel);
+	      let brickDensity = Math.floor(Math.random() * 10);
 
 	      randomLevel.push(brickDensity);
 	    }
@@ -718,6 +699,110 @@
 	}
 
 	module.exports = Level;
+
+/***/ }),
+/* 6 */
+/***/ (function(module, exports, __webpack_require__) {
+
+	const Render = __webpack_require__(1);
+
+	class Brick extends Render {
+	  constructor(x, y, width, height, density = 1) {
+	    super(x, y, width, height);
+	    this.density = density;
+	  }
+
+	  makeBrick(context) {
+	    context.translate(this.x, this.y);
+
+	    // layer1/Rectangle
+	    context.save();
+	    context.beginPath();
+	    context.moveTo(72.7, 25.0);
+	    context.lineTo(2.3, 25.0);
+	    context.bezierCurveTo(1.0, 25.0, 0.0, 24.0, 0.0, 22.7);
+	    context.lineTo(0.0, 2.3);
+	    context.bezierCurveTo(0.0, 1.0, 1.0, 0.0, 2.3, 0.0);
+	    context.lineTo(72.7, 0.0);
+	    context.bezierCurveTo(74.0, 0.0, 75.0, 1.0, 75.0, 2.3);
+	    context.lineTo(75.0, 22.7);
+	    context.bezierCurveTo(75.0, 24.0, 74.0, 25.0, 72.7, 25.0);
+	    context.closePath();
+	    context.fillStyle = this.getBrickColor();
+	    context.fill();
+	    let gradient = context.createLinearGradient(37.5, 0.0, 37.5, 25.0);
+
+	    gradient.addColorStop(0.00, "rgba(0, 0, 0, .2)");
+	    gradient.addColorStop(0.15, "rgba(0, 0, 0, .0)");
+	    gradient.addColorStop(0.27, "rgba(0, 0, 0, .2)");
+	    gradient.addColorStop(0.74, "rgba(0, 0, 0, .5)");
+	    gradient.addColorStop(1.00, "rgba(0, 0, 0, .6)");
+	    context.fillStyle = gradient;
+	    context.fill();
+	    context.lineWidth = 0.2;
+	    context.stroke();
+
+	    // layer1/Rectangle
+	    context.globalAlpha = context.globalAlpha * 0.20;
+	    context.beginPath();
+	    context.moveTo(75.0, 12.0);
+	    context.lineTo(0.0, 12.0);
+	    context.lineTo(0.0, 11.0);
+	    context.lineTo(75.0, 11.0);
+	    context.lineTo(75.0, 12.0);
+	    context.closePath();
+	    context.fillStyle = "rgb(0, 0, 0)";
+	    context.fill();
+
+	    // layer1/Rectangle
+	    context.beginPath();
+	    context.moveTo(75.0, 11.0);
+	    context.lineTo(0.0, 11.0);
+	    context.lineTo(0.0, 10.0);
+	    context.lineTo(75.0, 10.0);
+	    context.lineTo(75.0, 11.0);
+	    context.closePath();
+	    context.fillStyle = "rgb(255, 255, 255)";
+	    context.fill();
+
+	    // layer1/Rectangle
+	    context.beginPath();
+	    context.moveTo(38.2, 25.0);
+	    context.lineTo(37.2, 25.0);
+	    context.lineTo(37.2, 0.0);
+	    context.lineTo(38.2, 0.0);
+	    context.lineTo(38.2, 25.0);
+	    context.closePath();
+	    context.fill();
+
+	    // layer1/Rectangle
+	    context.beginPath();
+	    context.moveTo(39.2, 25.0);
+	    context.lineTo(38.2, 25.0);
+	    context.lineTo(38.2, 0.0);
+	    context.lineTo(39.2, 0.0);
+	    context.lineTo(39.2, 25.0);
+	    context.closePath();
+	    context.fillStyle = "rgb(0, 0, 0)";
+	    context.fill();
+	    context.restore();
+	    context.translate(-this.x, -this.y);
+	  }
+
+	  getBrickColor() {
+	    let colors = ['', 'rgb(247, 123, 62)', 'rgb(247, 62, 62)', 'rgb(247, 62, 151)', 'rgb(199, 62, 247)', 'rgb(62, 64, 247)', 'rgb(62, 153, 247)', 'rgb(62, 247, 231)', 'rgb(62, 247, 103)', 'rgb(160, 247, 62)', 'rgb(247, 234, 62)'];
+	    let brickColor = 'rgb(200, 200, 200)';
+
+	    if (colors[this.density]) {
+	      brickColor = colors[this.density];
+	    }
+	    return brickColor;
+	  }
+
+	  checkForPowerUps() {}
+	}
+
+	module.exports = Brick;
 
 /***/ }),
 /* 7 */
@@ -754,7 +839,7 @@
 
 
 	// module
-	exports.push([module.id, "canvas {\n  border: 1px solid #000000;\n  background: #4E5B57;\n  display: block;\n  margin: auto;\n}\n.fail {\n  background: #cd4d4d;\n  transition: all 250ms ease;\n}\n", ""]);
+	exports.push([module.id, "canvas {\n  border: 2px solid #000000;\n  background: #4E5B57;\n  display: block;\n  margin: auto;\n}\n.fail {\n  border: 2px solid #cd4d4d;\n  transition: all 250ms ease;\n}\n", ""]);
 
 	// exports
 

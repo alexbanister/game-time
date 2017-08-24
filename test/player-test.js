@@ -40,8 +40,8 @@ describe('Player Functionality', function () {
     assert.equal(player.balls, 3);
   });
 
-  it.skip('should have the ability to receive a powerUp', function () {
-    //need a powerUp check
+  it('should have the ability to receive a powerUp', function () {
+    assert.equal(player.activePowerUp);
   });
 
   it('should have a function to move the paddle', function () {
