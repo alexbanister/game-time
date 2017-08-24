@@ -1,5 +1,6 @@
 var { assert } = require('chai');
 const Level = require('../lib/Level.js');
+const Brick = require('../lib/Brick.js');
 let level;
 
 describe('Level Functionality', function () {
@@ -22,10 +23,11 @@ describe('Level Functionality', function () {
     assert.isFunction(level.buildBricks);
   });
 
-  it.skip('once all bricks on current level have been destroyed, level should increment', function () {
+  it.only('once all bricks on current level have been destroyed, level should increment', function () {
+    let brick = new Brick();
+
     //checkGameState needs refactor
     assert.equal(level.currentLevel, 1);
-    level.buildBricks({}, {}, {}, { velocityX: 1, velocityY: 1 });
     level.bricks = [];
     level.checkGameState();
     assert.equal(level.currentLevel, 2);
