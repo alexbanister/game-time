@@ -12,10 +12,6 @@ describe('Player Functionality', function () {
     assert.isObject(player, 'player is an object');
   });
 
-  it('should have a function that draws a paddle', function () {
-    assert.isFunction(player.drawPaddle);
-  });
-
   it('should have an x coodrinate value with a default', function() {
     assert.equal(player.x, 450);
   });
@@ -59,16 +55,11 @@ describe('Player Functionality', function () {
     assert.equal(player.x, e.layerX - player.width / 2);
   });
 
-  it('should have a function to display lives', function () {
-    assert.isFunction(player.displayLives);
-  });
-
   it('should have a function to launch the ball', function () {
     assert.isFunction(player.launchBall);
   });
 
-  it.skip('launchBall function should change the velocity of the ball', function () {
-    //canvas.clasList should be refactored into Render class.
+  it('launchBall function should change the velocity of the ball', function () {
     const ball = new Ball(500, 300);
 
     assert.equal(ball.velocityX, 0);
@@ -76,14 +67,6 @@ describe('Player Functionality', function () {
     player.launchBall(ball, {});
     assert.equal(ball.velocityX, -1.8);
     assert.equal(ball.velocityY, -1.8);
-  });
-
-  it('should have a function to display level', function () {
-    assert.isFunction(player.displayLevel);
-  });
-
-  it('should have a function to display score', function () {
-    assert.isFunction(player.displayScore);
   });
 
   it('score should increment when increaseScore function is called', function () {

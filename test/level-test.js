@@ -2,9 +2,11 @@ var { assert } = require('chai');
 const Level = require('../lib/Level.js');
 const Ball = require('../lib/Ball.js');
 const Player = require('../lib/Player.js');
+const Brick = require('../lib/Brick.js');
 let ball;
 let level;
 let player;
+let brick;
 
 describe('Level Functionality', function () {
   beforeEach(() => {
@@ -26,13 +28,11 @@ describe('Level Functionality', function () {
     assert.isFunction(level.buildBricks);
   });
 
-  it.only('once all bricks on current level have been destroyed, level should increment', function () {
-    let brick = new Brick();
+  it('once all bricks on current level have been destroyed, level should increment', function () {
+    ball = new Ball();
 
-    //checkGameState needs refactor
     assert.equal(level.currentLevel, 1);
-    level.bricks = [];
-    level.checkGameState();
+    level.completeLevel(ball, []);
     assert.equal(level.currentLevel, 2);
   });
 
@@ -43,8 +43,6 @@ describe('Level Functionality', function () {
   it('should have a function that checks the state of the game', function () {
     assert.isFunction(level.checkGameState);
   });
-
-  //need sub-tests for internal functions of check game state
 
   it('should have a function that checks that will draw a random level when the set levels have been run through', function () {
     assert.isFunction(level.drawRandomLevel);
