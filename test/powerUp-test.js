@@ -1,14 +1,18 @@
 var { assert } = require('chai');
 const PowerUp = require('../lib/PowerUp.js');
 const Player = require('../lib/Player.js');
+const Ball = require('../lib/Ball.js');
 let powerUp;
 let player;
+let ball;
+let context;
 
 describe('PowerUp Functionality', function () {
   beforeEach(() => {
     player = new Player();
+    ball = new Ball();
 
-    powerUp = new PowerUp(10, 10, 10, 10, player);
+    powerUp = new PowerUp(10, 10, 10, 10, player, context, ball);
   });
 
   it('should be an object', function () {
@@ -42,16 +46,29 @@ describe('PowerUp Functionality', function () {
     assert.equal(powerUp.player.width, 200);
     powerUp.removePowerUp();
     assert.equal(powerUp.player.width, 100);
+    assert.equal(powerUp.powerUp.ball.sticky, false);
+    powerUp.powerUpList[3].power();
+    assert.equal(powerUp.powerUp.ball.sticky, true);
+    powerUp.removePowerUp();
   });
 
-  it.skip('should have function to let powerups fall off screen if not caught by player', function () {
+  it('should have function to let powerups fall off screen if not caught by player', function () {
     assert.isFunction(powerUp.fallOffScreen, 'this is a function');
-    powerUp.y = 599
+    player.currentPowerUps.push(powerUp);
+    assert.deepEqual(player.currentPowerUps, [ powerUp ])
+    powerUp.y = 601
     powerUp.fallOffScreen();
+    assert.deepEqual(player.currentPowerUps, [ ])
   });
 
-  it.skip('should have function that triggers a powerUp when the powerUp hits the paddle', function () {
+  it('should have function that triggers a powerUp when the powerUp hits the paddle', function () {
     assert.isFunction(powerUp.hitPaddle, 'this is a function');
-    powerUp.y = 599
+
+    powerUp.y = 550;
+    powerUp.x = 700;
+    player.x = 700;
+    assert.equal(powerUp.hitPaddle(), false);
+    powerUp.y = 560;
+    assert.equal(powerUp.hitPaddle(), true);
   });
 });

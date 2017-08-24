@@ -41,10 +41,6 @@ describe('Level Functionality', function () {
 
   //need sub-tests for internal functions of check game state
 
-  it.skip('should have a function that checks the gets the background of the level', function () {
-    assert.isFunction(level.getLevelBackground);
-  });
-
   it('should have a function that checks that will draw a random level when the set levels have been run through', function () {
     assert.isFunction(level.drawRandomLevel);
   });

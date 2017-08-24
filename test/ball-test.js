@@ -57,7 +57,7 @@ describe('Ball Functionality', function () {
 
   it('as the paddle moves along its x-axis, the balls x-axis should change to match that of the players x-axis', function () {
     const player = new Player();
-    
+
     ball.x = 10;
     ball.y = 10;
 
@@ -115,7 +115,7 @@ describe('Ball Functionality', function () {
     ball.y = 555;
     ball.x = 495;
     assert.equal(ball.checkForCollisionsWithPaddle(player), true);
-    assert.equal(ball.velocityX, -0.2);
+    assert.equal(ball.velocityX, -0.4);
     assert.equal(ball.velocityY.toFixed(6), -1.9);
   });
 
