@@ -86,7 +86,7 @@ describe('Player Functionality', function () {
     assert.isFunction(player.displayScore);
   });
 
-  it('score should increment when increaseScoreyScore function is called', function () {
+  it('score should increment when increaseScore function is called', function () {
     let hitBrick = [{}];
     assert.equal(player.score, 0);
     player.increaseScore(hitBrick);
