@@ -12,10 +12,6 @@ describe('Ball Functionality', function () {
     assert.isObject(ball, 'ball is an object');
   });
 
-  it('should have a function that makes a ball', function () {
-    assert.isFunction(ball.makeBall);
-  });
-
   it('should have an x coodrinate value', function() {
     assert.equal(ball.x, 500);
   });
