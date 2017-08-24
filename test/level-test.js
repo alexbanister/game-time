@@ -1,6 +1,10 @@
 var { assert } = require('chai');
 const Level = require('../lib/Level.js');
+const Ball = require('../lib/Ball.js');
+const Player = require('../lib/Player.js');
+let ball;
 let level;
+let player;
 
 describe('Level Functionality', function () {
   beforeEach(() => {
@@ -47,5 +51,18 @@ describe('Level Functionality', function () {
 
   it('should have a function that gets the template of a given level', function () {
     assert.isFunction(level.getLevelTemplate);
+  });
+
+  it('brick density should decrement when hit by a ball', function () {
+    ball = new Ball();
+    player = new Player();
+    level.currentLevel = 6;
+    level.bricks = level.buildBricks();
+    ball.x = 44;
+    ball.y = 30;
+    assert.equal(level.bricks[0].density, 2);
+    ball.y = 45;
+    ball.checkForCollisionsWithBrick(level, player, {});
+    assert.equal(level.bricks[0].density, 1);
   });
 });
